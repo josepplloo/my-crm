@@ -18,7 +18,7 @@ const data = [
 
 const resolvers = {
   Query: {
-    getCourses: () => data,
+    getCourses: (_, {input}, ctx, info) => data.filter((course) => input.tech === course.tech),
     getTechs: () => data
   }
 };
