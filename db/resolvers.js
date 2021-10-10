@@ -1,28 +1,18 @@
 const User = require('../models/User');
 const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const data = [
-  {
-    id: 1,
-    title: 'course 1',
-    tech: 'ES6'
-  },
-  {
-    id: 2,
-    title: 'course 3',
-    tech: 'Python'
-  },
-  {
-    id: 3,
-    title: 'course 2',
-    tech: 'Ruby'
-  }
-];
+const newToken = (user, secret, expiresIn) => {
+  const {id, email, name, surname} = user;
+  return jwt.sign({id, email, name, surname}, secret, {expiresIn});
+}
 
 const resolvers = {
   Query: {
-    getCourses: (_, {input}, ctx, info) => data.filter((course) => input.tech === course.tech),
-    getTechs: () => data
+    getUserByToken: async(_, {token}) => {
+      const userID = await jwt.verify(token, process.env.SECRET);
+      return userID;
+    }
   },
   Mutation: {
     newUser: async(_, {input}) => {
@@ -42,6 +32,24 @@ const resolvers = {
          return user;
       } catch (error) {
         console.error('erro creating new user', error);
+      }
+    },
+    authUser: async(_, {input}) => {
+      const { email, password } = input;
+
+      const userExist = await User.findOne({email});
+      if(!userExist) {
+        throw new Error('the user not exist');
+      }
+
+      // check if pass is correct
+      const passCorrect = await bcryptjs.compare(password, userExist.password);
+      if(!passCorrect) {
+        throw new Error('the password is incorrect');
+      }
+
+      return {
+        token: newToken(userExist, process.env.SECRET, '24h')
       }
     }
   }
