@@ -14,5 +14,5 @@ https://www.udemy.com/course/fullstack-react-graphql-y-apollo-de-principiante-a-
       - _obj input_: is the argument of your resolver.
       - _security ctx_: is for sharing variables among resolvers.
       - _query info_: meta data about the query.
-- **GraphQL** Is a tech created by FB to create customs APIs base on a new query language based on graphs.
+- **GraphQL** Is a tech created by FB to create customs APIs using on a new query language based on graphs. GraphQL has 5 types: Integer, Id, String, Boolean, Float.
 - **MongoDB** Is a document based database.
