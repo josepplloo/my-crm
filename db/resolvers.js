@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Product = require('../models/Product');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -50,6 +51,15 @@ const resolvers = {
 
       return {
         token: newToken(userExist, process.env.SECRET, '24h')
+      }
+    },
+    newProduct: async (_,{input}) => {
+      try {
+        const product = new Product(input);
+        const result = await product.save();
+        return result;
+      } catch (error) {
+        console.log('the product creation fails', error);
       }
     }
   }
