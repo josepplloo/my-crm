@@ -13,6 +13,20 @@ const resolvers = {
     getUserByToken: async(_, {token}) => {
       const userID = await jwt.verify(token, process.env.SECRET);
       return userID;
+    },
+    getAllProducts: async() => {
+      try {
+        return await Product.find({});
+      } catch (error) {
+        console.error('error fetchin the products', error);
+      }
+    },
+    getProduct:  async(_, {id}) => {
+      const product = await Product.findById(id);
+      if(!product) {
+        throw new Error('Product not found');
+      }
+      return product;
     }
   },
   Mutation: {
@@ -32,7 +46,7 @@ const resolvers = {
          user.save();
          return user;
       } catch (error) {
-        console.error('erro creating new user', error);
+        console.error('error creating new user', error);
       }
     },
     authUser: async(_, {input}) => {
@@ -61,6 +75,21 @@ const resolvers = {
       } catch (error) {
         console.log('the product creation fails', error);
       }
+    },
+    updateProduct: async (_,{id, input}) => {
+      const product = await Product.findById(id);
+      if(!product) {
+        throw new Error('Product not found');
+      }
+      return await Product.findOneAndUpdate({_id: id}, input, {new: true});
+    },
+    deleteProduct: async (_,{id}) => {
+      const product = await Product.findById(id);
+      if(!product) {
+        throw new Error('Product not found');
+      }
+      await Product.findOneAndDelete({_id: id});
+      return 'Product deleted';
     }
   }
 };
