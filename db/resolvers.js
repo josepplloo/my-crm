@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Client = require('../models/Client');
 const Product = require('../models/Product');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -27,6 +28,31 @@ const resolvers = {
         throw new Error('Product not found');
       }
       return product;
+    },
+    getAllClients: async() => {
+      try {
+        return await Client.find({});
+      } catch (error) {
+        console.error('error fetchin the Clients', error);
+      }
+    },
+    getClientsByUser: async(_, {}, ctx) => {
+      try {
+        const clients = await Client.find({salesPerson: ctx.id.toString()})
+        return clients;
+      } catch (error) {
+        console.error('error fetchin the Clients', error);
+      }
+    },
+    getClient: async(_, {id}, ctx) => {
+      const client = await Client.findById(id);
+      if(!client) {
+        throw new Error('Client not found');
+      }
+      if (client.salesPerson.toString() !== ctx.id ) {
+        throw new Error('Client not belong to the user');
+      }
+      return client;
     }
   },
   Mutation: {
@@ -90,7 +116,45 @@ const resolvers = {
       }
       await Product.findOneAndDelete({_id: id});
       return 'Product deleted';
-    }
+    },
+    newClient: async(_, { input }, ctx) => {
+      const { email } = input;
+
+      input.salesPerson = ctx.id;
+
+      const clientExist = await User.findOne({email});
+      if(clientExist) {
+        throw new Error('the client exist');
+      }
+      try {
+        const client = new Client(input);
+        const result = await client.save();
+        return result;
+      } catch (error) {
+        console.log('the client creation fails', error);
+      }
+    },
+    updateClient: async (_,{id, input}, ctx) => {
+      const client = await Client.findById(id);
+      if(!client) {
+        throw new Error('Client not found');
+      }
+      if (client.salesPerson.toString() !== ctx.id ) {
+        throw new Error('Client not belong to the user');
+      }
+      return await Client.findOneAndUpdate({_id: id}, input, {new: true});
+    },
+    deleteClient: async(_,{id}, ctx) => {
+      const client = await Client.findById(id);
+      if(!client) {
+        throw new Error('Client not found');
+      }
+      if (client.salesPerson.toString() !== ctx.id ) {
+        throw new Error('Client not belong to the user');
+      }
+      await Client.findOneAndDelete({_id: id});
+      return 'Client deleted';
+    }  
   }
 };
 
