@@ -34,6 +34,28 @@ const typeDefs = gql`
     salesPerson: ID
   }
 
+  #Order
+  enum OrderStatus {
+    PENDING
+    PROCESSING
+    DELIVERED
+  }
+
+  type productOrdered {
+    id: ID
+    quantity: Int
+  }
+
+  type Order {
+    id: ID
+    client: ID
+    salesPerson: ID
+    productsOrdered: [productOrdered]
+    total: Float
+    created: String
+    status: OrderStatus
+  }
+
   #User
   input InputUser {
     name: String!
@@ -71,7 +93,20 @@ const typeDefs = gql`
     company: String!
     telephone: String
   }
-  
+
+  #Orders
+  input InputProductOrder {
+    product: ID!
+    quantity: Int!
+  }
+
+  input InputOrder {
+    client: ID!
+    total: Float!
+    products: [InputProductOrder]
+    status: OrderStatus
+  }
+
   type Mutation {
     #Users
     newUser(input: InputUser): User
@@ -86,6 +121,9 @@ const typeDefs = gql`
     newClient(input: InputClient) : Client
     updateClient(id: ID!, input: InputClient): Client
     deleteClient(id: ID!): String
+
+    #Orders
+    newOrder(input: InputOrder) : Order
   }
 `;
 
