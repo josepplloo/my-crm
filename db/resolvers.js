@@ -154,7 +154,39 @@ const resolvers = {
       }
       await Client.findOneAndDelete({_id: id});
       return 'Client deleted';
-    }  
+    },
+    newOrder: async(_, {input}, ctx) => {
+      const { client, products, products } = input;
+      const clientExist = await Client.findById(client);
+      if(!clientExist) {
+        throw new Error('the client not exist');
+      }
+      if (clientExist.salesPerson.toString() !== ctx.id ) {
+        throw new Error('Client not belong to the user');
+      }
+      const productsExist = await Product.find({_id: {$in: products}});
+      if(productsExist.length !== products.length) {
+        throw new Error('the products not exist');
+      }
+      products.forEach(product => {
+        const {id} = product;
+        const productFinded = Product.findById(id);
+        if(productFinded.stock < product.quantity) {
+          throw new Error(`No stok for the product: ${id}`);
+        }else{
+          productFinded.stock -= product.quantity;
+          productFinded.save();
+        }
+      });
+      try {
+        const order = new Order(input);
+        order.salesPerson = ctx.id;
+        const result = await order.save();
+        return result;
+      } catch (error) {
+        console.log('the order creation fails', error);
+      }
+    },
   }
 };
 
