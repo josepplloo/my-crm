@@ -9,6 +9,10 @@ const typeDefs = gql`
     email: String
     created: String
   }
+  type TopUser {
+    total: Float
+    client: [User]
+  }
 
   type Token {
     token: String
@@ -94,8 +98,8 @@ const typeDefs = gql`
     getOrdersByState(state: String!): [Order]
 
     getTopClients: [TopClient]
-    bestSalesPerson: [User]
-    findProduct: [Product]
+    bestSalesPerson: [TopUser]
+    findProduct(text: String): [Product]
   }
 
   #Clients
