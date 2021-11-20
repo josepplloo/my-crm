@@ -79,6 +79,14 @@ const resolvers = {
         throw new Error('order not belong to the user');
       }
       return order;
+    },
+    getOrdersByState: async(_, {state}, ctx) => {
+      try {
+        const orders = await Order.find({salesPerson: ctx.id.toString(), state})
+        return orders;
+      } catch (error) {
+        console.error('error fetchin the Orders', error);
+      }
     }
   },
   Mutation: {
@@ -248,6 +256,17 @@ const resolvers = {
 
       return await Order.findOneAndUpdate({_id: id}, input, {new: true});
     },
+    deleteOrder: async(_,{id}, ctx) => {
+      const order = await Order.findById(id);
+      if(!order) {
+        throw new Error('Order not found');
+      }
+      if (order.salesPerson.toString() !== ctx.id ) {
+        throw new Error('Order does not belong to the user');
+      }
+      await Order.findOneAndDelete({_id: id});
+      return 'Order deleted';
+    }
   }
 };
 

@@ -86,6 +86,7 @@ const typeDefs = gql`
     getAllOrders: [Order]
     getOrdersByUser: [Order]
     getOrder(id: ID!): Order
+    getOrdersByState(state: String!): [Order]
   }
 
   #Clients
@@ -128,7 +129,7 @@ const typeDefs = gql`
     #Orders
     newOrder(input: InputOrder) : Order
     updateOrder(id: ID!, input: InputOrder): Order
-
+    deleteOrder(id: ID!): String
   }
 `;
 
