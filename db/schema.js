@@ -9,6 +9,10 @@ const typeDefs = gql`
     email: String
     created: String
   }
+  type TopUser {
+    total: Float
+    client: [User]
+  }
 
   type Token {
     token: String
@@ -32,6 +36,33 @@ const typeDefs = gql`
     company: String
     telephone: String
     salesPerson: ID
+  }
+  
+  type TopClient {
+    total: Float
+    client: [Client]
+  }
+
+  #Order
+  enum OrderStatus {
+    PENDING
+    PROCESSING
+    DELIVERED
+  }
+
+  type productOrdered {
+    id: ID
+    quantity: Int
+  }
+
+  type Order {
+    id: ID
+    client: ID
+    salesPerson: ID
+    productsOrdered: [productOrdered]
+    total: Float
+    created: String
+    status: OrderStatus
   }
 
   #User
@@ -61,6 +92,14 @@ const typeDefs = gql`
     getAllClients: [Client]
     getClientsByUser: [Client]
     getClient(id: ID!): Client
+    getAllOrders: [Order]
+    getOrdersByUser: [Order]
+    getOrder(id: ID!): Order
+    getOrdersByState(state: String!): [Order]
+
+    getTopClients: [TopClient]
+    bestSalesPerson: [TopUser]
+    findProduct(text: String): [Product]
   }
 
   #Clients
@@ -71,7 +110,20 @@ const typeDefs = gql`
     company: String!
     telephone: String
   }
-  
+
+  #Orders
+  input InputProductOrder {
+    product: ID!
+    quantity: Int!
+  }
+
+  input InputOrder {
+    client: ID!
+    total: Float!
+    products: [InputProductOrder]
+    status: OrderStatus
+  }
+
   type Mutation {
     #Users
     newUser(input: InputUser): User
@@ -86,6 +138,11 @@ const typeDefs = gql`
     newClient(input: InputClient) : Client
     updateClient(id: ID!, input: InputClient): Client
     deleteClient(id: ID!): String
+
+    #Orders
+    newOrder(input: InputOrder) : Order
+    updateOrder(id: ID!, input: InputOrder): Order
+    deleteOrder(id: ID!): String
   }
 `;
 
