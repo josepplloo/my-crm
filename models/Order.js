@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const orderSchema = mongoose.Schema({
-  orders: {
+  order: {
     type: Array,
     required: true,
   },

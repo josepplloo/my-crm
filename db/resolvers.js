@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Client = require('../models/Client');
 const Product = require('../models/Product');
+const Order = require('../models/Order');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -53,6 +54,31 @@ const resolvers = {
         throw new Error('Client not belong to the user');
       }
       return client;
+    },
+    getAllOrders: async() => {
+      try {
+        return await Order.find({});
+      } catch (error) {
+        console.error('error fetchin the Orders', error);
+      }
+    },
+    getOrdersByUser: async(_, {}, ctx) => {
+      try {
+        const orders = await Order.find({salesPerson: ctx.id.toString()})
+        return orders;
+      } catch (error) {
+        console.error('error fetchin the Orders', error);
+      }
+    },
+    getOrder: async(_, {id}, ctx) => {
+      const order = await Order.findById(id);
+      if(!order) {
+        throw new Error('order not found');
+      }
+      if (Order.salesPerson.toString() !== ctx.id ) {
+        throw new Error('order not belong to the user');
+      }
+      return order;
     }
   },
   Mutation: {
@@ -140,7 +166,7 @@ const resolvers = {
         throw new Error('Client not found');
       }
       if (client.salesPerson.toString() !== ctx.id ) {
-        throw new Error('Client not belong to the user');
+        throw new Error('Client does not belong to the user');
       }
       return await Client.findOneAndUpdate({_id: id}, input, {new: true});
     },
@@ -150,34 +176,39 @@ const resolvers = {
         throw new Error('Client not found');
       }
       if (client.salesPerson.toString() !== ctx.id ) {
-        throw new Error('Client not belong to the user');
+        throw new Error('Client does not belong to the user');
       }
       await Client.findOneAndDelete({_id: id});
       return 'Client deleted';
     },
     newOrder: async(_, {input}, ctx) => {
-      const { client, products, products } = input;
+      const { client, products } = input;
       const clientExist = await Client.findById(client);
       if(!clientExist) {
-        throw new Error('the client not exist');
+        throw new Error('client does not exist');
       }
       if (clientExist.salesPerson.toString() !== ctx.id ) {
-        throw new Error('Client not belong to the user');
+        throw new Error('Client does not belong to the user');
       }
+
       const productsExist = await Product.find({_id: {$in: products}});
       if(productsExist.length !== products.length) {
-        throw new Error('the products not exist');
+        throw new Error('the products do not exist');
       }
+      
       products.forEach(product => {
         const {id} = product;
+
         const productFinded = Product.findById(id);
+        
         if(productFinded.stock < product.quantity) {
-          throw new Error(`No stok for the product: ${id}`);
+          throw new Error(`No stock for the product: ${id}`);
         }else{
           productFinded.stock -= product.quantity;
           productFinded.save();
         }
       });
+
       try {
         const order = new Order(input);
         order.salesPerson = ctx.id;
@@ -186,6 +217,36 @@ const resolvers = {
       } catch (error) {
         console.log('the order creation fails', error);
       }
+    },
+    updateOrder: async (_,{id, input}, ctx) => {
+      const order = await Order.findById(id);
+      const { client, products } = input;
+      const clientExist = await Client.findById(client);
+      if(!clientExist) {
+        throw new Error('client does not exist');
+      }
+      if(!order) {
+        throw new Error('Order not found');
+      }
+
+      if (clientExist.salesPerson.toString() !== ctx.id ) {
+        throw new Error('Order does not belong to the user');
+      }
+
+      products.forEach(product => {
+        const {id} = product;
+
+        const productFinded = Product.findById(id);
+        
+        if(productFinded.stock < product.quantity) {
+          throw new Error(`No stock for the product: ${id}`);
+        }else{
+          productFinded.stock -= product.quantity;
+          productFinded.save();
+        }
+      });
+
+      return await Order.findOneAndUpdate({_id: id}, input, {new: true});
     },
   }
 };
