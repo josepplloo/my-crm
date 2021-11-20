@@ -87,6 +87,65 @@ const resolvers = {
       } catch (error) {
         console.error('error fetchin the Orders', error);
       }
+    },
+    getTopClients: async() => {
+      try {
+        const clients = await Client.aggregate([
+          { $match : { state : "COMPLETED" } },
+            { $group : {
+                _id : "$client", 
+                total: { $sum: '$total' }
+            }}, 
+            {
+                $lookup: {
+                    from: 'client', 
+                    localField: '_id',
+                    foreignField: "_id",
+                    as: "client"
+                }
+            }, 
+            {
+                $limit: 10
+            }, 
+            {
+                $sort : { total : -1 }
+            
+            }
+          ])
+        return clients;
+      } catch (error) {
+        console.error('error fetchin the Orders', error);
+      }
+    },
+    bestSalesPerson: async () => {
+      const salesPerson = await Order.aggregate([
+          { $match : { state : "COMPLETED"} },
+          { $group : {
+              _id : "$salesPerson", 
+              total: {$sum: '$total'}
+          }},
+          {
+              $lookup: {
+                  from: 'user', 
+                  localField: '_id',
+                  foreignField: '_id',
+                  as: 'salesPerson'
+              }
+          }, 
+          {
+              $limit: 3
+          }, 
+          {
+              $sort: { total : -1 }
+          }
+      ]);
+
+      return salesPerson;
+    },
+    findProduct: async(_, { text }) => {
+        const products = await Producto.find({ $text: { $search: text } }).limit(10)
+
+        return products;
     }
   },
   Mutation: {

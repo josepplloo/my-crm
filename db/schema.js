@@ -33,6 +33,11 @@ const typeDefs = gql`
     telephone: String
     salesPerson: ID
   }
+  
+  type TopClient {
+    total: Float
+    client: [Client]
+  }
 
   #Order
   enum OrderStatus {
@@ -87,6 +92,10 @@ const typeDefs = gql`
     getOrdersByUser: [Order]
     getOrder(id: ID!): Order
     getOrdersByState(state: String!): [Order]
+
+    getTopClients: [TopClient]
+    bestSalesPerson: [User]
+    findProduct: [Product]
   }
 
   #Clients
