@@ -11,7 +11,6 @@ const NEW_ACCOUNT = gql`
           name
           surname
           email
-          password
         }
     }
 `;

@@ -1,6 +1,25 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
+import fetch from 'node-fetch';
+import { setContext } from 'apollo-link-context';
 
-export const client = new ApolloClient({
-  uri: 'https://48p1r2roz4.sse.codesandbox.io',
-  cache: new InMemoryCache()
+const httpLink = createHttpLink({
+  uri: 'http://localhost:4000',
+  fetch
 });
+
+const authLink = setContext((_, {headers}) => {
+  return {
+    headers: {
+      ...headers,
+      header: 'myHeader'
+    }
+  }
+})
+
+const client = new ApolloClient({
+  connectToDevTools: true,
+  cache: new InMemoryCache(),
+  link: authLink.concat( httpLink ),
+});
+
+export default client;
