@@ -16,4 +16,21 @@ https://www.udemy.com/course/fullstack-react-graphql-y-apollo-de-principiante-a-
       - _query info_: meta data about the query.
 - **GraphQL** Is a tech created by FB to create customs APIs using on a new query language based on graphs. GraphQL has 5 types: Integer, Id, String, Boolean, Float.
 - **MongoDB** Is a document based database.
-- **javascriptwebtoken** Is a library to represent data via tokens, those tokens return an encoded payload with the info that you need. A token is creating with 3 params: payload, secret string, expiration time. 
+- **javascriptwebtoken** Is a library to represent data via tokens, those tokens return an encoded payload with the info that you need. A token is creating with 3 params: payload, secret string, expiration time.
+## Configurations
+There is a special configuration for linking your server with apollo, that configuration changes depending on the vendor.
+
+given that I whant my app to authenticate the users. I use this [code](/crm-client/config/apollo.js):
+```js
+const client = new ApolloClient({
+  connectToDevTools: true,
+  cache: new InMemoryCache(),
+  link: authLink.concat( httpLink ),
+});
+```
+
+where **authLink** and **httpLink** and in
+> `link: `*authLink*`.concat( `*httpLink*` )`
+
+ provides the authentication headers and the access to the server respectively
+ 
