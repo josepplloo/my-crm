@@ -16,7 +16,7 @@ const server = new ApolloServer({
     const authToken = req.headers['authorization'] || '';
     if(authToken) {
       try {
-        const user = jwt.verify(authToken, process.env.SECRET);
+        const user = jwt.verify(authToken.replace('Bearer', '').trim(), process.env.SECRET);
         return user;
       } catch (error) {
         console.error('Error creating the user context', error);
