@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import Layout from '../components/Layout';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -140,6 +141,11 @@ const Login = () => {
                 value="Iniciar Sesión"
               />
             </form>
+            <p className="text-center text-gray-200 text-s">
+              You don't have an account?{' '}
+              <Link href="/new-account"><a className="block font-bold hover:underline ">Create one</a></Link>
+            </p>
+            {message && <img  className="animate-spin w-7 m-auto" src="/favicon.ico" alt="versel logo spiner" />}
           </div>
         </div>
       </section>
